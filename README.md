@@ -8,7 +8,7 @@ This tool collects keystroke timing data for behavioral analysis research. It re
 
 - **Python 3.7+** installed on your computer
 - **macOS users**: You'll need to grant Accessibility permissions (instructions below)
-- **Internet connection** to access TypeRacer
+- **Internet connection** to access MonkeyType
 
 ---
 
@@ -65,22 +65,26 @@ Before running the script, have the following information ready:
 - **Participant ID**: Your USF UID (University ID number)
 - **Condition**: Your current state (Morning, Post-Caffeine, Post-Lunch, or Fatigue)
 - **Task Type**: 
-  - `fixed` - TypeRacer with fixed text
+  - `fixed` - MonkeyType with custom text
   - `free` - Free typing
 
 **Note:** Session IDs are automatically generated! The script will count how many times you've done this specific condition and assign the next session number.
 
-### Step 2: Open TypeRacer (DO THIS FIRST!)
+### Step 2: Open MonkeyType (DO THIS FIRST!)
 
-⚠️ **IMPORTANT: Open TypeRacer BEFORE running the script!**
+⚠️ **IMPORTANT: Open MonkeyType BEFORE running the script!**
 
-1. Go to **[play.typeracer.com](https://play.typeracer.com)**
-2. Click on **"Enter a Typing Test"**
-3. Wait for the race to load (DON'T start typing yet!)
-4. Keep this browser window/tab open and ready
-5. Position your hands on the keyboard
+1. Go to **[MonkeyType.com](https://monkeytype.com/)**
+2. Click on **"Custom"** at the top
+3. Click on **"Change"** to enter custom text
+4. Enter this for your typing prompt:
+   ```
+   The quick brown fox jumps over the lazy dog while typing steadily to complete this sentence for biometric analysis.
+   ```
+5. Keep this browser window/tab open and ready
+6. Position your hands on the keyboard
 
-**Only after TypeRacer is loaded and ready, proceed to Step 3.**
+**Only after MonkeyType is loaded and ready, proceed to Step 3.**
 
 ### Step 3: Run the Data Collector
 
@@ -118,11 +122,11 @@ Recording for Participant [YOUR_UID] | Condition: Morning
 Press ESC when finished.
 ```
 
-### Step 4: Complete the TypeRacer Test
+### Step 4: Complete the MonkeyType Test
 
-1. **Switch to your TypeRacer browser window**
-2. **Start typing the race!** The script is now recording all your keystrokes
-3. **Complete the entire race**
+1. **Switch to your MonkeyType browser window**
+2. **Start typing the test!** The script is now recording all your keystrokes
+3. **Complete the entire test**
 4. **After finishing, press ESC** to stop recording and save the data
 
 ### Step 5: Verify Data Saved
@@ -163,7 +167,7 @@ Each session generates a CSV file named: `{participant_id}_{condition}_S{session
 ## ⚠️ Important Notes
 
 ### Before Each Session:
-- ✅ **FIRST: Open TypeRacer and load the race**
+- ✅ **FIRST: Open MonkeyType and load the test**
 - ✅ **THEN: Run the Python script**
 - ✅ Close unnecessary applications
 - ✅ Ensure you're in the correct condition (e.g., don't select "Post-Caffeine" if you haven't had coffee)
@@ -201,6 +205,49 @@ Each session generates a CSV file named: `{participant_id}_{condition}_S{session
 
 ---
 
+## 🔬 Data Processing & Analysis Pipeline
+
+After collecting keystroke data, you can extract behavioral features and perform authentication analysis.
+
+### Feature Extraction
+
+The `features.py` script processes raw keystroke data and calculates behavioral metrics:
+
+**Run feature extraction:**
+```bash
+python utils/features.py
+```
+
+**Features Calculated:**
+- **Hold Time (mean & std)**: How long keys are held down
+- **Flight Time (mean & std)**: Time between consecutive keystrokes
+- **Typing Speed**: Keys per second
+
+**Output:** Creates `data/processed/features.csv` with aggregated features per session.
+
+### Authentication System
+
+The `authentication.py` script evaluates how well keystroke patterns can distinguish between users:
+
+**Run authentication analysis:**
+```bash
+python utils/authentication.py
+```
+
+**How it works:**
+1. Creates user templates from Morning session data
+2. Computes **genuine scores**: Distance between user and their own template
+3. Computes **impostor scores**: Distance between user and other users' templates
+4. Uses Euclidean distance as the similarity metric
+
+**Output:**
+- `data/processed/genuine_scores.csv` - Scores for legitimate users
+- `data/processed/impostor_scores.csv` - Scores for impostors
+
+**Note:** You need data from multiple participants to generate impostor scores!
+
+---
+
 ## 📊 Data Collection Schedule
 
 ### Recommended Sessions per Participant:
@@ -230,7 +277,7 @@ Each session generates a CSV file named: `{participant_id}_{condition}_S{session
 - Backup your data regularly
 
 ### Quality Checks:
-- Each CSV should have 100+ rows (one TypeRacer race typically has 200-500 keystrokes)
+- Each CSV should have 100+ rows (one MonkeyType test typically has 200-500 keystrokes)
 - Verify timestamps are in milliseconds (13-digit numbers)
 - Check that `order_index` is sequential (0, 1, 2, 3...)
 
@@ -248,7 +295,7 @@ If you encounter any issues during data collection, contact the project lead or 
 - [ ] Virtual environment created and activated
 - [ ] Dependencies installed (`pip install -r requirements.txt`)
 - [ ] Accessibility permissions granted (macOS)
-- [ ] TypeRacer website open and ready
+- [ ] MonkeyType website open and ready
 - [ ] USF UID (Participant ID) ready
 - [ ] Condition/state identified
 - [ ] `data/raw/` folder exists
